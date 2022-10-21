@@ -38,13 +38,13 @@ public class WordCount {
  public static void main(String[] args) throws Exception {
     Configuration conf = new Configuration();
         
-        Job job = new Job(conf, "wordcount");
+        Job job = new Job(conf, "wordcount_guocheng");
     
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntWritable.class);
         
     job.setMapperClass(Map.class);
-    job.setReducerClass(Reduce.class);
+//    job.setReducerClass(Reduce.class);
     job.setJarByClass(WordCount.class);
         
     job.setInputFormatClass(TextInputFormat.class);
