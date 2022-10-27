@@ -80,7 +80,7 @@ public class Kmean {
 		}
 	}
 
-	if(distance == 0.0){
+	if(Math.round(distance) == 0){
 		return true;
 	}
 	return false;
@@ -166,7 +166,7 @@ public class Kmean {
 		for(int j = 0; j < Group.size(); j++){
 			sum+=Group.get(j).get(i);	
 		}
-		avg[i] = sum/Group.size();
+		avg[i] = Math.round((sum/Group.size())*100)/100;
 	}
 	context.write(new Text(""), new Text(Arrays.toString(avg).replace("[", "").replace("]", "")));
     }
