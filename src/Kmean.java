@@ -190,7 +190,7 @@ public class Kmean {
     Configuration conf = new Configuration();
         
     int i = 0;
-    while(i < 5){
+    while(i < 50){
 	if(i >= 1){
         	ArrayList<ArrayList<Double>> newK = getK(new Path(args[1]+"/result"+(i-1)+"/center/part-r-00000"));
 		if(compareCenter(k, newK)){
