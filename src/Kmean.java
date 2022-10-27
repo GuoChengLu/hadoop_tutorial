@@ -189,9 +189,9 @@ public class Kmean {
     Configuration conf = new Configuration();
         
     int i = 0;
-    /*while(i < 100){
+    while(i < 5){
 	if(i >= 1){
-        	ArrayList<ArrayList<Double>> newK = getK(new Path(args[1]+"/result"+(i-1)+"/part-r-00000"));
+        	ArrayList<ArrayList<Double>> newK = getK(new Path(args[1]+"/result"+(i-1)+"/center/part-r-00000"));
 		if(compareCenter(k, newK)){
 			break;
 		}
@@ -202,7 +202,7 @@ public class Kmean {
 	}
     	Job job = new Job(conf, "Kmean"+i);
     
-    	job.setOutputKeyClass(Text.class);
+    	job.setOutputKeyClass(IntWritable.class);
     	job.setOutputValueClass(Text.class);
         
     	job.setMapperClass(Map.class);
@@ -213,28 +213,33 @@ public class Kmean {
     	job.setOutputFormatClass(TextOutputFormat.class);
         
     	FileInputFormat.addInputPath(job, new Path(args[0]));
-    	FileOutputFormat.setOutputPath(job, new Path(args[1]+"/result"+i));
+    	FileOutputFormat.setOutputPath(job, new Path(args[1]+"/result"+i+"/center"));
         
     	job.waitForCompletion(true);
-	i++;
-    }*/
-
-    Job job = new Job(conf, "KmeanResult");
-    k = getK(new Path(args[2]));
     
-    job.setOutputKeyClass(IntWritable.class);
-    job.setOutputValueClass(Text.class);
+    	Job job2 = new Job(conf, "KmeanResult"+i);
+	ArrayList<ArrayList<Double>> tempK = k;
+    	k = getK(new Path(args[1]+"/result"+i+"/center/part-r-00000"));
+    
+    	job2.setOutputKeyClass(IntWritable.class);
+    	job2.setOutputValueClass(Text.class);
         
-    job.setMapperClass(Map.class);
-    job.setReducerClass(ResultReduce.class);
-    job.setJarByClass(WordCount.class);
+    	job2.setMapperClass(Map.class);
+    	job2.setReducerClass(ResultReduce.class);
+    	job2.setJarByClass(WordCount.class);
         
-    job.setInputFormatClass(TextInputFormat.class);
-    job.setOutputFormatClass(TextOutputFormat.class);
+    	job2.setInputFormatClass(TextInputFormat.class);
+    	job2.setOutputFormatClass(TextOutputFormat.class);
         
-    FileInputFormat.addInputPath(job, new Path(args[0]));
-    FileOutputFormat.setOutputPath(job, new Path(args[1]));
-    job.waitForCompletion(true);
+    	FileInputFormat.addInputPath(job2, new Path(args[0]));
+    	FileOutputFormat.setOutputPath(job2, new Path(args[1]+"/result"+i+"/class"));
+    	job2.waitForCompletion(true);
+	
+	k=tempK;
+	
+	i++;
+    }
+
         
  }
         
