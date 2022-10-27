@@ -163,10 +163,11 @@ public class Kmean {
 	for(int i = 0; i < 24; i++){
 		
         	double sum = 0;
-		for(int j = 0; j < Group.size(); j++){
+		int size = Group.size();
+		for(int j = 0; j < size; j++){
 			sum+=Group.get(j).get(i);	
 		}
-		avg[i] = Math.round((sum/Group.size())*100)/100;
+		avg[i] = Math.round( (double)(sum/size) * 100.0 ) / 100.0;
 	}
 	context.write(new Text(""), new Text(Arrays.toString(avg).replace("[", "").replace("]", "")));
     }
