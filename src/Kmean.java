@@ -15,15 +15,15 @@ import org.apache.hadoop.util.LineReader;
         
 public class Kmean {
 
- public static ArrayList<ArrayList<Double>>  k = InitialK();
+ public static ArrayList<ArrayList<Integer>>  k = InitialK();
 
- public static ArrayList<ArrayList<Double>> InitialK(){
+ public static ArrayList<ArrayList<Integer>> InitialK(){
 	
-        ArrayList<ArrayList<Double>> result = new ArrayList<ArrayList<Double>>();
+        ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
 	for(int i = 0; i < 3; i++){ //k=3
-		ArrayList<Double> temp = new ArrayList<Double>();
+		ArrayList<Integer> temp = new ArrayList<Integer>();
 		for(int j = 0; j < 24; j++){ // 24 dimansion
-			temp.add((Double)(Math.random()*50));
+			temp.add((int)(Math.random()*50));
 		}
 		result.add(temp);
 	}
@@ -32,9 +32,9 @@ public class Kmean {
  }
 
  
- public static ArrayList<ArrayList<Double>> getK(Path path) throws IOException, InterruptedException {
+ public static ArrayList<ArrayList<Integer>> getK(Path path) throws IOException, InterruptedException {
 	
-        ArrayList<ArrayList<Double>> result = new ArrayList<ArrayList<Double>>();
+        ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
 	Configuration conf = new Configuration();
 	
 
@@ -48,18 +48,19 @@ public class Kmean {
 	while(lineReader.readLine(line) > 0){
 		String tempLine = line.toString();
 		StringTokenizer tokenizer = new StringTokenizer(tempLine, ",");
-		ArrayList<Double> tempList = new ArrayList<Double>();
+		ArrayList<Integer> tempList = new ArrayList<Integer>();
 		while(tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
-			tempList.add(Double.parseDouble(token));
+			tempList.add(Integer.parseInt(token.trim()));
+			//System.out.println(token);
 		}
 		result.add(tempList);
 	}
 	int size = result.size();
 	for(int i = size; i < 3; i++){
-		ArrayList<Double> temp = new ArrayList<Double>();
+		ArrayList<Integer> temp = new ArrayList<Integer>();
 		for(int j = 0; j < 24; j++){
-			temp.add((Double)(Math.random()*50));
+			temp.add((int)(Math.random()*50));
 		}
 		result.add(temp);
 	}
@@ -67,35 +68,35 @@ public class Kmean {
  }
  
 
- public static boolean compareCenter(ArrayList<ArrayList<Double>> old, ArrayList<ArrayList<Double>> newone){
+ public static boolean compareCenter(ArrayList<ArrayList<Integer>> old, ArrayList<ArrayList<Integer>> newone){
 	int size = 24;
 	
-	double distance = 0;
+	int distance = 0;
 
 	for(int i = 0; i < 3; i++){
 		for(int j = 0; j < size; j++){
-			double pm1 = Math.abs(old.get(i).get(j));
-			double pm2 = Math.abs(newone.get(i).get(j));
+			int pm1 = Math.abs(old.get(i).get(j));
+			int pm2 = Math.abs(newone.get(i).get(j));
 			distance += Math.pow(pm1-pm2, 2);
 		}
 	}
 
-	if(Math.round(distance) == 0){
+	if(distance == 0){
 		return true;
 	}
 	return false;
  }
  
- public static double distance(ArrayList<Double> a, ArrayList<Double> b){
-	double result = 0.0;
+ public static int distance(ArrayList<Integer> a, ArrayList<Integer> b){
+	int result = 0;
 	
 	for(int i = 0; i < 24; i++){
-		double pm1 = Math.abs(a.get(i));
-		double pm2 = Math.abs(b.get(i));
+		int pm1 = Math.abs(a.get(i));
+		int pm2 = Math.abs(b.get(i));
 		result += Math.pow(pm1-pm2, 2);
 	}
 	
-	result = Math.sqrt(result);
+	result = (int)Math.sqrt(result);
 	return result;
  }
 
@@ -107,8 +108,8 @@ public class Kmean {
 	int count = 0;
         String line = value.toString();
         StringTokenizer tokenizer = new StringTokenizer(line, ",");
-	ArrayList<Double> temp = new ArrayList<Double>();
-	double mindistance = 99999999;
+	ArrayList<Integer> temp = new ArrayList<Integer>();
+	int mindistance = 99999999;
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();
 	    if(count > 2){
@@ -116,7 +117,7 @@ public class Kmean {
 			token = "0";
 		}
 		if(token.matches("[+-]?\\d*(\\.\\d+)?")){
-			temp.add(Double.parseDouble(token));	
+			temp.add(Integer.parseInt(token.trim()));	
 		}
 	    }
 	    count++;
@@ -126,7 +127,7 @@ public class Kmean {
 		if(temp.size() != 24){
 			break;
 	  	}
-		double tempD = distance(temp, k.get(i));
+		int tempD = distance(temp, k.get(i));
 		if(mindistance > tempD){
 			mindistance = tempD;
 			minID = i;
@@ -141,10 +142,10 @@ public class Kmean {
 
     public void reduce(IntWritable key, Iterable<Text> values, Context context) 
       throws IOException, InterruptedException {
-	double[] avg = new double[24];
-	ArrayList<ArrayList<Double>> Group = new ArrayList<ArrayList<Double>>();
+	int[] avg = new int[24];
+	ArrayList<ArrayList<Integer>> Group = new ArrayList<ArrayList<Integer>>();
         for (Text val : values) {
-	    ArrayList<Double> temp = new ArrayList<Double>();
+	    ArrayList<Integer> temp = new ArrayList<Integer>();
 	    String line = val.toString();
             StringTokenizer tokenizer = new StringTokenizer(line, ",");
 	    while(tokenizer.hasMoreTokens()){
@@ -153,7 +154,7 @@ public class Kmean {
 			token = "0";
 		}
 		if(token.matches("[+-]?\\d*(\\.\\d+)?")){
-			temp.add(Double.parseDouble(token));	
+			temp.add(Integer.parseInt(token.trim()));	
 		}
             }
 	    if(temp.size() == 24){
@@ -162,12 +163,12 @@ public class Kmean {
         }
 	for(int i = 0; i < 24; i++){
 		
-        	double sum = 0;
+        	int sum = 0;
 		int size = Group.size();
 		for(int j = 0; j < size; j++){
 			sum+=Group.get(j).get(i);	
 		}
-		avg[i] = Math.round( (double)(sum/size) * 100.0 ) / 100.0;
+		avg[i] = (int)(sum/size);
 	}
 	context.write(new Text(""), new Text(Arrays.toString(avg).replace("[", "").replace("]", "")));
     }
@@ -192,7 +193,7 @@ public class Kmean {
     int i = 0;
     while(i < 50){
 	if(i >= 1){
-        	ArrayList<ArrayList<Double>> newK = getK(new Path(args[1]+"/result"+(i-1)+"/center/part-r-00000"));
+        	ArrayList<ArrayList<Integer>> newK = getK(new Path(args[1]+"/result"+(i-1)+"/center/part-r-00000"));
 		if(compareCenter(k, newK)){
 			break;
 		}
@@ -219,7 +220,7 @@ public class Kmean {
     	job.waitForCompletion(true);
     
     	Job job2 = new Job(conf, "KmeanResult"+i);
-	ArrayList<ArrayList<Double>> tempK = k;
+	ArrayList<ArrayList<Integer>> tempK = k;
     	k = getK(new Path(args[1]+"/result"+i+"/center/part-r-00000"));
     
     	job2.setOutputKeyClass(IntWritable.class);
