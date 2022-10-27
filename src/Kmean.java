@@ -23,7 +23,7 @@ public class Kmean {
 	for(int i = 0; i < 3; i++){ //k=3
 		ArrayList<Double> temp = new ArrayList<Double>();
 		for(int j = 0; j < 24; j++){ // 24 dimansion
-			temp.add((Double)(Math.random()*100));
+			temp.add((Double)(Math.random()*50));
 		}
 		result.add(temp);
 	}
@@ -54,6 +54,14 @@ public class Kmean {
 			tempList.add(Double.parseDouble(token));
 		}
 		result.add(tempList);
+	}
+	int size = result.size();
+	for(int i = size; i < 3; i++){
+		ArrayList<Double> temp = new ArrayList<Double>();
+		for(int j = 0; j < 24; j++){
+			temp.add((Double)(Math.random()*50));
+		}
+		result.add(temp);
 	}
 	return result;
  }
@@ -158,10 +166,22 @@ public class Kmean {
 		for(int j = 0; j < Group.size(); j++){
 			sum+=Group.get(j).get(i);	
 		}
-		avg[i] = sum/24;
+		avg[i] = sum/Group.size();
 	}
 	context.write(new Text(""), new Text(Arrays.toString(avg).replace("[", "").replace("]", "")));
     }
+ }
+
+ public static class ResultReduce extends Reducer<IntWritable, Text, IntWritable, Text> {
+
+    public void Reduce(IntWritable key, Iterable<Text> values, Context context) 
+      throws IOException, InterruptedException {
+      for(Text val : values) {
+	  context.write(key, val);
+      }  
+
+    }
+
  }
         
  public static void main(String[] args) throws Exception {
@@ -169,7 +189,7 @@ public class Kmean {
     Configuration conf = new Configuration();
         
     int i = 0;
-    while(i < 100){
+    /*while(i < 100){
 	if(i >= 1){
         	ArrayList<ArrayList<Double>> newK = getK(new Path(args[1]+"/result"+(i-1)+"/part-r-00000"));
 		if(compareCenter(k, newK)){
@@ -182,7 +202,7 @@ public class Kmean {
 	}
     	Job job = new Job(conf, "Kmean"+i);
     
-    	job.setOutputKeyClass(IntWritable.class);
+    	job.setOutputKeyClass(Text.class);
     	job.setOutputValueClass(Text.class);
         
     	job.setMapperClass(Map.class);
@@ -197,7 +217,25 @@ public class Kmean {
         
     	job.waitForCompletion(true);
 	i++;
-    }
+    }*/
+
+    Job job = new Job(conf, "KmeanResult");
+    k = getK(new Path(args[2]));
+    
+    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputValueClass(Text.class);
+        
+    job.setMapperClass(Map.class);
+    job.setReducerClass(ResultReduce.class);
+    job.setJarByClass(WordCount.class);
+        
+    job.setInputFormatClass(TextInputFormat.class);
+    job.setOutputFormatClass(TextOutputFormat.class);
+        
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    job.waitForCompletion(true);
+        
  }
         
 }
