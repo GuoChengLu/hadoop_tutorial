@@ -116,6 +116,7 @@ public class Kmean {
 		if(token == ""){
 			token = "0";
 		}
+		token = token.replace("x", "");
 		if(token.matches("[+-]?\\d*(\\.\\d+)?")){
 			temp.add(Integer.parseInt(token.trim()));	
 		}
@@ -133,8 +134,9 @@ public class Kmean {
 			minID = i;
 		}
 	}
-
-        context.write(new IntWritable(minID), new Text(line));
+	if(temp.size() == 24){
+        	context.write(new IntWritable(minID), new Text(line));
+	}
     }
  } 
         
@@ -191,7 +193,7 @@ public class Kmean {
     Configuration conf = new Configuration();
         
     int i = 0;
-    while(i < 50){
+    while(i < 2){
 	if(i >= 1){
         	ArrayList<ArrayList<Integer>> newK = getK(new Path(args[1]+"/result"+(i-1)+"/center/part-r-00000"));
 		if(compareCenter(k, newK)){
