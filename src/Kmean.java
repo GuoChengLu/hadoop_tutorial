@@ -23,7 +23,7 @@ public class Kmean {
 	for(int i = 0; i < 3; i++){ //k=3
 		ArrayList<Integer> temp = new ArrayList<Integer>();
 		for(int j = 0; j < 24; j++){ // 24 dimansion
-			temp.add((int)(Math.random()*50));
+			temp.add((int)(Math.random()*100));
 		}
 		result.add(temp);
 	}
@@ -60,7 +60,7 @@ public class Kmean {
 	for(int i = size; i < 3; i++){
 		ArrayList<Integer> temp = new ArrayList<Integer>();
 		for(int j = 0; j < 24; j++){
-			temp.add((int)(Math.random()*50));
+			temp.add((int)(Math.random()*100));
 		}
 		result.add(temp);
 	}
@@ -91,8 +91,8 @@ public class Kmean {
 	int result = 0;
 	
 	for(int i = 0; i < 24; i++){
-		int pm1 = Math.abs(a.get(i));
-		int pm2 = Math.abs(b.get(i));
+		int pm1 = a.get(i);
+		int pm2 = b.get(i);
 		result += Math.pow(pm1-pm2, 2);
 	}
 	
@@ -107,22 +107,21 @@ public class Kmean {
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 	int count = 0;
         String line = value.toString();
-        StringTokenizer tokenizer = new StringTokenizer(line, ",");
+	String [] tokens = line.split(",");
 	ArrayList<Integer> temp = new ArrayList<Integer>();
 	int mindistance = 99999999;
-        while (tokenizer.hasMoreTokens()) {
-            String token = tokenizer.nextToken();
-	    if(count > 2){
-		if(token == ""){
-			token = "0";
+	for(int i = 0; i < tokens.length; i++){
+
+	    if(i > 2){
+		if(tokens[i].isEmpty()){
+			tokens[i] = "0";
 		}
-		token = token.replace("x", "");
-		if(token.matches("[+-]?\\d*(\\.\\d+)?")){
-			temp.add(Integer.parseInt(token.trim()));	
-		}
+		tokens[i] = tokens[i].replace("x", "");
+		if(tokens[i].matches("[+-]?\\d*(\\.\\d+)?")){
+			temp.add(Integer.parseInt(tokens[i].trim()));	
+            	}
 	    }
-	    count++;
-        }
+	}
 	int minID = 0;
 	for(int i = 0; i < 3; i++){
 		if(temp.size() != 24){
@@ -149,16 +148,20 @@ public class Kmean {
         for (Text val : values) {
 	    ArrayList<Integer> temp = new ArrayList<Integer>();
 	    String line = val.toString();
+	    String [] tokens = line.split(",");
             StringTokenizer tokenizer = new StringTokenizer(line, ",");
-	    while(tokenizer.hasMoreTokens()){
-		String token = tokenizer.nextToken();
-		if(token == ""){
-			token = "0";
-		}
-		if(token.matches("[+-]?\\d*(\\.\\d+)?")){
-			temp.add(Integer.parseInt(token.trim()));	
-		}
-            }
+	    for(int i = 0; i < tokens.length; i++){
+
+	        if(i > 2){
+		    if(tokens[i].isEmpty()){
+			tokens[i] = "0";
+		    }
+		    tokens[i] = tokens[i].replace("x", "");
+		    if(tokens[i].matches("[+-]?\\d*(\\.\\d+)?")){
+			temp.add(Integer.parseInt(tokens[i].trim()));	
+            	    }
+	        }
+	    }
 	    if(temp.size() == 24){
 		Group.add(temp);
 	    }
@@ -193,10 +196,10 @@ public class Kmean {
     Configuration conf = new Configuration();
         
     int i = 0;
-    while(i < 2){
+    while(i < 15){
 	if(i >= 1){
         	ArrayList<ArrayList<Integer>> newK = getK(new Path(args[1]+"/result"+(i-1)+"/center/part-r-00000"));
-		if(compareCenter(k, newK)){
+		if(k == newK){
 			break;
 		}
 		k = newK;
